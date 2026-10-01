@@ -5,6 +5,9 @@ inventory. Built with **Next.js 16** (App Router), **React 19** and **TypeScript
 
 > ⚠️ **Nothing can be saved.** A handful of sample assets are seeded so the UI is
 > reviewable, but there is no database behind the forms. See [Data](#data).
+>
+> 🔀 **Work in progress.** Three commits are not yet pushed to GitHub — see
+> [Development log](#development-log--2-oct-2026).
 
 > Converted from the original single-file static app. `index.html` at the repo root is the
 > legacy standalone version, kept only for reference — the live application is the
@@ -161,6 +164,73 @@ correctly: pages stay statically prerendered until a query needs request-time da
   styles, `.kpis` bottom margin, a skip link, and `:focus-visible` rings.
 - Styling is plain CSS with a small custom design system. No Tailwind, no UI library.
 
+## Development log — 2 Oct 2026
+
+Day one of the Next.js rewrite, done with Claude. The app was a single 198-line
+`index.html` (vanilla HTML/CSS/JS, no build step) and is now a Next.js App Router
+project. **Nothing has been pushed yet** — see [Blocked: push](#blocked-push).
+
+### What changed
+
+| Commit | Change |
+| --- | --- |
+| `bcddede` | Converted `index.html` → Next.js 16.3.8 / React 19.3.0 / TypeScript 5.9.3 |
+| `0d74a53` | Deleted all hardcoded sample data; added the empty `lib/store/` data layer |
+| `7db24e1` | Cleaned the 5 asset records and seeded them into the store |
+
+1. **Routes.** All 18 sidebar sections became real routes instead of `showPage()` div
+   swapping, so deep links and the browser back button work. `app/page.tsx` redirects `/`
+   to `/dashboard`, which preserves the old root-URL behaviour Vercel depends on.
+2. **CSS.** The inline `<style>` block moved to `app/globals.css`. Verified faithful by
+   diffing rule-by-rule against the original: 51 of 65 rules byte-identical, both media
+   queries unchanged. Only deliberate deltas were `.nav button` → `.nav a` (links now),
+   dropping the dead `.page` rules, plus `.notice` / `.empty` / `.spacer` / skip-link /
+   `:focus-visible` additions for the new markup.
+3. **Data.** `lib/data.ts` (mock records) was created, then deleted entirely at the user's
+   request and replaced with `lib/store/` — async accessors that return empty results.
+   Five assets were then cleaned and seeded into `lib/store/assets.ts` (`SEED_ASSETS`).
+4. **Derived, not hardcoded.** Dashboard counters, category/location breakdowns, audit
+   totals, the next asset code, and the Add Asset dropdown options all compute from
+   `listAssets()`. Add a record and every number updates itself.
+
+### Bugs found and fixed during verification
+
+- **Double `aria-current="page"`.** On `/assets/new`, both "All Assets" and "Add Asset"
+  were marked as the current page, because the active check used a prefix match. Now only
+  the exact match sets `aria-current`; the ancestor still gets the `active` CSS class.
+- **Search box missing from prerendered HTML.** The first pass made the topbar a client
+  component behind a `Suspense` boundary, so the served HTML had no search input
+  (layout shift, broken with JS off). Replaced with a plain `GET` form to `/assets?q=…`.
+- **`setState` in an effect.** The React Compiler lint rule rejected syncing the topbar
+  input to the URL via `useEffect`. Fixed with a `key`-based remount instead.
+- **Dashboard flush against KPI row.** `.kpis` had no bottom margin in the original.
+
+### Gotchas worth remembering
+
+- **Keep ESLint on 9.x.** `eslint-config-next@16` bundles an `eslint-plugin-react` that
+  crashes on ESLint 10 with `contextOrFilename.getFilename is not a function`. ESLint 10
+  is the current npm release, so don't "upgrade" it without checking this.
+- **`main` has no upstream tracking.** Plain `git push` fails; use `git push -u origin main`.
+- **`npm view` hangs** on this machine (npm registry reachable, but the CLI times out).
+  Use `Invoke-WebRequest https://registry.npmjs.org/<pkg>/latest` to check versions.
+- **PowerShell**: `finally` is not a keyword (that's why one commit silently didn't run);
+  `gh`/`git` write prompts to stderr, so `2>&1` output looks like errors.
+- **Don't verify with mixed regex/wildcard matching.** Feeding `[regex]::Escape` output
+  into PowerShell's `-like` (a wildcard operator) produces false "MISSING" results on any
+  string containing a space. Use `.Contains()`.
+
+### Blocked: push
+
+The 3 commits are committed locally and the tree is clean, but they are **not on GitHub
+yet**. `gh` was never logged in and Git Credential Manager has no stored credentials, so
+`git push` fails with `could not read Username for 'https://github.com'` (no TTY available
+to prompt). The repo is publicly *readable*, which is why `git ls-remote` works and can be
+misleading.
+
+To finish: authenticate with `gh auth login --web`, then `gh auth setup-git`, then
+`git push -u origin main`. **Pushing will auto-deploy to production** via Vercel — note
+that the live site will go from the old static mock UI to the 5-asset seeded version.
+
 ## Deployment & Git workflow
 
 This project is connected to **GitHub** and **Vercel** with **automatic deploys on every
@@ -178,7 +248,15 @@ push to `main`**.
 ```
 git add -A
 git commit -m "describe your change"
-git push origin main
+git push -u origin main
+```
+
+`main` has no upstream tracking configured, so the `-u` is required on the first push.
+If the push is rejected with `could not read Username for 'https://github.com'`, there are
+no stored credentials — authenticate first:
+
+```
+gh auth login --web      # then: gh auth setup-git
 ```
 
 Vercel detects the Next.js framework, runs `npm run build`, and serves the output. There
@@ -187,3 +265,6 @@ is no longer a `index.html` entry-point requirement — the root URL `/` is hand
 
 > **Note:** Vercel's build needs Node 20+ (this project was developed on Node 24).
 > Vercel provides this by default.
+
+> **Security:** the GitHub and Vercel tokens used during the original setup were shared in
+> chat. Rotate them and store replacements in environment variables rather than files.
