@@ -1,10 +1,28 @@
+import { Badge } from "@/components/Badge";
 import { DataTable } from "@/components/DataTable";
+import type { Column } from "@/components/DataTable";
 import { KpiGrid } from "@/components/KpiGrid";
 import { PageHeader } from "@/components/PageHeader";
 import { Panel } from "@/components/Panel";
-import { MAINTENANCE_RECORDS, MAINTENANCE_STATS } from "@/lib/data";
+import { formatCurrency } from "@/lib/format";
+import { getMaintenanceSummary, listMaintenance } from "@/lib/store";
+import type { MaintenanceRecord } from "@/lib/types";
 
-export default function MaintenancePage() {
+const COLUMNS: Column<MaintenanceRecord>[] = [
+  { header: "Asset", render: (row) => row.code },
+  { header: "Problem", render: (row) => row.problem },
+  { header: "Date", render: (row) => row.date },
+  { header: "Technician", render: (row) => row.technician },
+  { header: "Cost", render: (row) => formatCurrency(row.cost) },
+  { header: "Status", render: (row) => <Badge status={row.status} /> },
+];
+
+export default async function MaintenancePage() {
+  const [summary, records] = await Promise.all([
+    getMaintenanceSummary(),
+    listMaintenance(),
+  ]);
+
   return (
     <>
       <PageHeader
@@ -16,9 +34,21 @@ export default function MaintenancePage() {
           </button>
         }
       />
-      <KpiGrid stats={MAINTENANCE_STATS} />
+      <KpiGrid
+        stats={[
+          { label: "Open", value: String(summary.open) },
+          { label: "In Progress", value: String(summary.inProgress) },
+          { label: "Completed", value: String(summary.completed) },
+          { label: "Total Cost", value: formatCurrency(summary.totalCost) },
+        ]}
+      />
       <Panel>
-        <DataTable table={MAINTENANCE_RECORDS} />
+        <DataTable
+          columns={COLUMNS}
+          rows={records}
+          rowKey={(row) => `${row.code}-${row.date}`}
+          emptyMessage="No maintenance records yet."
+        />
       </Panel>
     </>
   );

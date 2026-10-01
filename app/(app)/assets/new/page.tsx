@@ -3,9 +3,11 @@ import Link from "next/link";
 import { AddAssetForm } from "@/components/AddAssetForm";
 import { PageHeader } from "@/components/PageHeader";
 import { Panel } from "@/components/Panel";
-import { NEXT_ASSET_CODE } from "@/lib/data";
+import { getNextAssetCode } from "@/lib/store";
 
-export default function AddAssetPage() {
+export default async function AddAssetPage() {
+  const assetCode = await getNextAssetCode();
+
   return (
     <>
       <PageHeader
@@ -18,7 +20,7 @@ export default function AddAssetPage() {
         }
       />
       <Panel>
-        <AddAssetForm assetCode={NEXT_ASSET_CODE} />
+        <AddAssetForm assetCode={assetCode} />
       </Panel>
     </>
   );

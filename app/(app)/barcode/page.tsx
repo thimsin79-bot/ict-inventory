@@ -1,7 +1,10 @@
 import { BarcodeTool } from "@/components/BarcodeTool";
 import { PageHeader } from "@/components/PageHeader";
+import { getNextAssetCode } from "@/lib/store";
 
-export default function BarcodePage() {
+export default async function BarcodePage() {
+  const assetCode = await getNextAssetCode();
+
   return (
     <>
       <PageHeader
@@ -9,7 +12,7 @@ export default function BarcodePage() {
         subtitle="Generate and print asset identification labels"
       />
       <div className="grid2">
-        <BarcodeTool />
+        <BarcodeTool defaultCode={assetCode} />
       </div>
     </>
   );

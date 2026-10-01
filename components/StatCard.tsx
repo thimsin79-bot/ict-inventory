@@ -1,12 +1,22 @@
-import type { StatCardData, Tone } from "@/lib/types";
-
-const FOOT_COLOR: Record<Tone, string | undefined> = {
+const FOOT_COLOR = {
   default: undefined,
   red: "var(--red)",
   orange: "var(--orange)",
-};
+} as const;
 
-export function StatCard({ label, value, foot, tone }: StatCardData) {
+export type Tone = keyof typeof FOOT_COLOR;
+
+export function StatCard({
+  label,
+  value,
+  foot,
+  tone = "default",
+}: {
+  label: string;
+  value: string;
+  foot: string;
+  tone?: Tone;
+}) {
   return (
     <div className="card">
       <div className="stat-label">{label}</div>

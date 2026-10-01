@@ -2,14 +2,14 @@ import Link from "next/link";
 
 import { AssetRegister } from "@/components/AssetRegister";
 import { PageHeader } from "@/components/PageHeader";
-import { ASSETS } from "@/lib/data";
+import { listAssets } from "@/lib/store";
 
 export default async function AssetsPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const { q } = await searchParams;
+  const [{ q }, assets] = await Promise.all([searchParams, listAssets()]);
   const query = q ?? "";
 
   return (
@@ -23,7 +23,7 @@ export default async function AssetsPage({
           </Link>
         }
       />
-      <AssetRegister key={query} assets={ASSETS} initialQuery={query} />
+      <AssetRegister key={query} assets={assets} initialQuery={query} />
     </>
   );
 }

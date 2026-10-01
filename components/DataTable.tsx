@@ -1,44 +1,43 @@
 import type { ReactNode } from "react";
 
-import { Badge } from "@/components/Badge";
-import type { SimpleTable, TableCell } from "@/lib/types";
-
-function renderCell(cell: TableCell): ReactNode {
-  if (typeof cell === "string") {
-    return cell;
-  }
-  return <Badge tone={cell.tone}>{cell.text}</Badge>;
+export interface Column<T> {
+  header: string;
+  render: (row: T) => ReactNode;
 }
 
-export function DataTable({ table, action }: { table: SimpleTable; action?: string }) {
+export function DataTable<T>({
+  columns,
+  rows,
+  rowKey,
+  emptyMessage = "No records yet.",
+}: {
+  columns: Column<T>[];
+  rows: T[];
+  rowKey: (row: T) => string;
+  emptyMessage?: string;
+}) {
+  if (rows.length === 0) {
+    return <p className="empty">{emptyMessage}</p>;
+  }
+
   return (
     <div className="tablewrap">
       <table>
         <thead>
           <tr>
-            {table.columns.map((column) => (
-              <th key={column} scope="col">
-                {column}
+            {columns.map((column) => (
+              <th key={column.header} scope="col">
+                {column.header}
               </th>
             ))}
-            {action ? (
-              <th scope="col">{action}</th>
-            ) : null}
           </tr>
         </thead>
         <tbody>
-          {table.rows.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {row.map((cell, cellIndex) => (
-                <td key={cellIndex}>{renderCell(cell)}</td>
+          {rows.map((row) => (
+            <tr key={rowKey(row)}>
+              {columns.map((column) => (
+                <td key={column.header}>{column.render(row)}</td>
               ))}
-              {action ? (
-                <td>
-                  <button className="btn btn-light" type="button">
-                    View
-                  </button>
-                </td>
-              ) : null}
             </tr>
           ))}
         </tbody>

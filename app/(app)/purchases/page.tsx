@@ -1,9 +1,22 @@
 import { DataTable } from "@/components/DataTable";
+import type { Column } from "@/components/DataTable";
 import { PageHeader } from "@/components/PageHeader";
 import { Panel } from "@/components/Panel";
-import { PURCHASES } from "@/lib/data";
+import { formatCurrency } from "@/lib/format";
+import { listPurchases } from "@/lib/store";
+import type { PurchaseRecord } from "@/lib/types";
 
-export default function PurchasesPage() {
+const COLUMNS: Column<PurchaseRecord>[] = [
+  { header: "Invoice", render: (row) => row.invoice },
+  { header: "Date", render: (row) => row.date },
+  { header: "Supplier", render: (row) => row.supplier },
+  { header: "Items", render: (row) => String(row.items) },
+  { header: "Total", render: (row) => formatCurrency(row.total) },
+];
+
+export default async function PurchasesPage() {
+  const purchases = await listPurchases();
+
   return (
     <>
       <PageHeader
@@ -16,7 +29,12 @@ export default function PurchasesPage() {
         }
       />
       <Panel>
-        <DataTable table={PURCHASES} />
+        <DataTable
+          columns={COLUMNS}
+          rows={purchases}
+          rowKey={(row) => row.invoice}
+          emptyMessage="No purchase records yet."
+        />
       </Panel>
     </>
   );

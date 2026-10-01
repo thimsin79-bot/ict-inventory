@@ -1,9 +1,22 @@
+import { Badge } from "@/components/Badge";
 import { DataTable } from "@/components/DataTable";
+import type { Column } from "@/components/DataTable";
 import { PageHeader } from "@/components/PageHeader";
 import { Panel } from "@/components/Panel";
-import { USERS } from "@/lib/data";
+import { listUsers } from "@/lib/store";
+import type { UserRecord } from "@/lib/types";
 
-export default function UsersPage() {
+const COLUMNS: Column<UserRecord>[] = [
+  { header: "Name", render: (row) => row.name },
+  { header: "Email", render: (row) => row.email },
+  { header: "Role", render: (row) => row.role },
+  { header: "Department", render: (row) => row.department },
+  { header: "Status", render: (row) => <Badge status={row.status} /> },
+];
+
+export default async function UsersPage() {
+  const users = await listUsers();
+
   return (
     <>
       <PageHeader
@@ -16,7 +29,12 @@ export default function UsersPage() {
         }
       />
       <Panel>
-        <DataTable table={USERS} />
+        <DataTable
+          columns={COLUMNS}
+          rows={users}
+          rowKey={(row) => row.email}
+          emptyMessage="No users added yet."
+        />
       </Panel>
     </>
   );

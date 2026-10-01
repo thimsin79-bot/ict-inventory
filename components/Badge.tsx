@@ -1,14 +1,5 @@
-import type { ReactNode } from "react";
+import { toneFor } from "@/lib/tone";
 
-import type { BadgeTone } from "@/lib/types";
-
-const TONE_CLASS: Record<BadgeTone, string> = {
-  active: "active-b",
-  assigned: "assigned-b",
-  maint: "maint-b",
-  broken: "broken-b",
-};
-
-export function Badge({ tone, children }: { tone: BadgeTone; children: ReactNode }) {
-  return <span className={`badge ${TONE_CLASS[tone]}`}>{children}</span>;
+export function Badge({ status }: { status: string }) {
+  return <span className={`badge ${toneFor(status)}-b`}>{status}</span>;
 }

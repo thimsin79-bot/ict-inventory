@@ -1,6 +1,16 @@
-import type { BarDatum } from "@/lib/types";
+import type { Breakdown } from "@/lib/types";
 
-export function BarList({ data }: { data: BarDatum[] }) {
+export function BarList({
+  data,
+  emptyMessage = "No data yet.",
+}: {
+  data: Breakdown[];
+  emptyMessage?: string;
+}) {
+  if (data.length === 0) {
+    return <p className="empty">{emptyMessage}</p>;
+  }
+
   return (
     <div>
       {data.map((datum) => (

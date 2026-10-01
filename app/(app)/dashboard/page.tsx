@@ -2,17 +2,39 @@ import Link from "next/link";
 
 import { BarList } from "@/components/BarList";
 import { DataTable } from "@/components/DataTable";
+import type { Column } from "@/components/DataTable";
 import { PageHeader } from "@/components/PageHeader";
 import { Panel } from "@/components/Panel";
 import { StatCard } from "@/components/StatCard";
+import { formatCurrency, formatPercent } from "@/lib/format";
 import {
-  ASSETS_BY_CATEGORY,
-  ASSETS_BY_LOCATION,
-  DASHBOARD_STATS,
-  RECENT_ACTIVITY,
-} from "@/lib/data";
+  getAssetSummary,
+  getCategoryBreakdown,
+  getLocationBreakdown,
+  listRecentActivity,
+} from "@/lib/store";
+import type { ActivityRecord } from "@/lib/types";
+import { Badge } from "@/components/Badge";
 
-export default function DashboardPage() {
+const ACTIVITY_COLUMNS: Column<ActivityRecord>[] = [
+  { header: "Asset Code", render: (row) => row.code },
+  { header: "Asset", render: (row) => row.asset },
+  { header: "Action", render: (row) => row.action },
+  { header: "User", render: (row) => row.user },
+  { header: "Date", render: (row) => row.date },
+  { header: "Status", render: (row) => <Badge status={row.status} /> },
+];
+
+export default async function DashboardPage() {
+  const [summary, categories, locations, activity] = await Promise.all([
+    getAssetSummary(),
+    getCategoryBreakdown(),
+    getLocationBreakdown(),
+    listRecentActivity(),
+  ]);
+
+  const activeTotal = summary.active + summary.assigned;
+
   return (
     <>
       <PageHeader
@@ -25,20 +47,49 @@ export default function DashboardPage() {
         }
       />
       <div className="cards">
-        {DASHBOARD_STATS.map((stat) => (
-          <StatCard key={stat.label} {...stat} />
-        ))}
+        <StatCard
+          label="TOTAL ASSETS"
+          value={String(summary.total)}
+          foot="In the asset register"
+        />
+        <StatCard
+          label="ACTIVE ASSETS"
+          value={String(activeTotal)}
+          foot={`${formatPercent(activeTotal, summary.total)} of inventory`}
+        />
+        <StatCard
+          label="BROKEN / DAMAGED"
+          value={String(summary.broken)}
+          foot="Needs attention"
+          tone="red"
+        />
+        <StatCard
+          label="MAINTENANCE"
+          value={String(summary.inMaintenance)}
+          foot="Open records"
+          tone="orange"
+        />
+        <StatCard
+          label="TOTAL VALUE"
+          value={formatCurrency(summary.totalValue)}
+          foot="Asset purchase value"
+        />
       </div>
       <div className="grid2">
         <Panel title="Assets by Category">
-          <BarList data={ASSETS_BY_CATEGORY} />
+          <BarList data={categories} />
         </Panel>
         <Panel title="Assets by Location">
-          <BarList data={ASSETS_BY_LOCATION} />
+          <BarList data={locations} />
         </Panel>
       </div>
       <Panel title="Recent Asset Activity">
-        <DataTable table={RECENT_ACTIVITY} />
+        <DataTable
+          columns={ACTIVITY_COLUMNS}
+          rows={activity}
+          rowKey={(row) => `${row.code}-${row.date}`}
+          emptyMessage="No activity recorded yet."
+        />
       </Panel>
     </>
   );

@@ -4,31 +4,31 @@ import { useState } from "react";
 
 import { Field } from "@/components/Field";
 import {
-  ASSET_LOCATIONS,
-  CATEGORIES,
-  CONDITIONS,
-  DEPARTMENTS,
-  STATUSES,
-  SUPPLIERS,
-} from "@/lib/data";
+  AVAILABILITY_OPTIONS,
+  CATEGORY_OPTIONS,
+  CONDITION_OPTIONS,
+  DEPARTMENT_OPTIONS,
+  LOCATION_OPTIONS,
+  SUPPLIER_OPTIONS,
+} from "@/lib/navigation";
 
 export function AddAssetForm({ assetCode }: { assetCode: string }) {
-  const [saved, setSaved] = useState(false);
+  const [message, setMessage] = useState("");
 
   return (
     <form
       className="formgrid"
       onSubmit={(event) => {
         event.preventDefault();
-        setSaved(true);
+        setMessage("Not saved: this app has no data source connected yet.");
       }}
     >
       <Field label="Asset Code" htmlFor="asset-code">
-        <input id="asset-code" name="assetCode" defaultValue={assetCode} required />
+        <input id="asset-code" name="assetCode" defaultValue={assetCode} />
       </Field>
       <Field label="Category" htmlFor="category">
-        <select id="category" name="category" defaultValue={CATEGORIES[0]}>
-          {CATEGORIES.map((option) => (
+        <select id="category" name="category" defaultValue={CATEGORY_OPTIONS[0]}>
+          {CATEGORY_OPTIONS.map((option) => (
             <option key={option}>{option}</option>
           ))}
         </select>
@@ -46,39 +46,48 @@ export function AddAssetForm({ assetCode }: { assetCode: string }) {
         <input id="purchase-date" name="purchaseDate" type="date" />
       </Field>
       <Field label="Purchase Price" htmlFor="purchase-price">
-        <input id="purchase-price" name="purchasePrice" type="number" step="0.01" placeholder="0.00" />
+        <input
+          id="purchase-price"
+          name="purchasePrice"
+          type="number"
+          step="0.01"
+          placeholder="0.00"
+        />
       </Field>
       <Field label="Supplier" htmlFor="supplier">
-        <select id="supplier" name="supplier" defaultValue={SUPPLIERS[0]}>
-          {SUPPLIERS.map((option) => (
+        <select id="supplier" name="supplier" defaultValue="">
+          <option value="">No suppliers available</option>
+          {SUPPLIER_OPTIONS.map((option) => (
             <option key={option}>{option}</option>
           ))}
         </select>
       </Field>
       <Field label="Location" htmlFor="location">
-        <select id="location" name="location" defaultValue={ASSET_LOCATIONS[0]}>
-          {ASSET_LOCATIONS.map((option) => (
+        <select id="location" name="location" defaultValue="">
+          <option value="">No locations available</option>
+          {LOCATION_OPTIONS.map((option) => (
             <option key={option}>{option}</option>
           ))}
         </select>
       </Field>
       <Field label="Department" htmlFor="department">
-        <select id="department" name="department" defaultValue={DEPARTMENTS[0]}>
-          {DEPARTMENTS.map((option) => (
+        <select id="department" name="department" defaultValue="">
+          <option value="">No departments available</option>
+          {DEPARTMENT_OPTIONS.map((option) => (
             <option key={option}>{option}</option>
           ))}
         </select>
       </Field>
       <Field label="Status" htmlFor="status">
-        <select id="status" name="status" defaultValue={STATUSES[0]}>
-          {STATUSES.map((option) => (
+        <select id="status" name="status" defaultValue={AVAILABILITY_OPTIONS[0]}>
+          {AVAILABILITY_OPTIONS.map((option) => (
             <option key={option}>{option}</option>
           ))}
         </select>
       </Field>
       <Field label="Condition" htmlFor="condition">
-        <select id="condition" name="condition" defaultValue={CONDITIONS[0]}>
-          {CONDITIONS.map((option) => (
+        <select id="condition" name="condition" defaultValue={CONDITION_OPTIONS[0]}>
+          {CONDITION_OPTIONS.map((option) => (
             <option key={option}>{option}</option>
           ))}
         </select>
@@ -87,9 +96,9 @@ export function AddAssetForm({ assetCode }: { assetCode: string }) {
         <textarea id="remarks" name="remarks" placeholder="Additional information..." />
       </Field>
       <div className="full">
-        {saved ? (
+        {message ? (
           <p className="notice" role="status">
-            Demo UI: asset saved successfully.
+            {message}
           </p>
         ) : null}
         <div className="spacer" />

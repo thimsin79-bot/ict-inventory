@@ -1,4 +1,4 @@
-import { CURRENT_USER } from "@/lib/data";
+import { CURRENT_USER } from "@/lib/navigation";
 
 export function Topbar() {
   return (

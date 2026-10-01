@@ -1,8 +1,10 @@
 import { KpiGrid } from "@/components/KpiGrid";
 import { PageHeader } from "@/components/PageHeader";
-import { AUDIT_STATS } from "@/lib/data";
+import { getAuditSummary } from "@/lib/store";
 
-export default function AuditPage() {
+export default async function AuditPage() {
+  const summary = await getAuditSummary();
+
   return (
     <>
       <PageHeader
@@ -14,7 +16,14 @@ export default function AuditPage() {
           </button>
         }
       />
-      <KpiGrid stats={AUDIT_STATS} />
+      <KpiGrid
+        stats={[
+          { label: "Assets to Verify", value: String(summary.toVerify) },
+          { label: "Verified", value: String(summary.verified) },
+          { label: "Missing", value: String(summary.missing) },
+          { label: "Pending", value: String(summary.pending) },
+        ]}
+      />
     </>
   );
 }

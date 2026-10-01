@@ -1,6 +1,10 @@
-import type { MiniStatData } from "@/lib/types";
+export interface Kpi {
+  label: string;
+  value: string;
+  icon?: string;
+}
 
-export function KpiGrid({ stats }: { stats: MiniStatData[] }) {
+export function KpiGrid({ stats }: { stats: Kpi[] }) {
   return (
     <div className="kpis">
       {stats.map((stat) => (

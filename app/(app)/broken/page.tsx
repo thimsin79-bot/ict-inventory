@@ -1,9 +1,23 @@
+import { Badge } from "@/components/Badge";
 import { DataTable } from "@/components/DataTable";
+import type { Column } from "@/components/DataTable";
 import { PageHeader } from "@/components/PageHeader";
 import { Panel } from "@/components/Panel";
-import { BROKEN_RECORDS } from "@/lib/data";
+import { listBroken } from "@/lib/store";
+import type { BrokenRecord } from "@/lib/types";
 
-export default function BrokenPage() {
+const COLUMNS: Column<BrokenRecord>[] = [
+  { header: "Asset", render: (row) => row.asset },
+  { header: "Problem", render: (row) => row.problem },
+  { header: "Location", render: (row) => row.location },
+  { header: "Reported Date", render: (row) => row.reportedDate },
+  { header: "Action", render: (row) => row.action },
+  { header: "Status", render: (row) => <Badge status={row.status} /> },
+];
+
+export default async function BrokenPage() {
+  const broken = await listBroken();
+
   return (
     <>
       <PageHeader
@@ -16,7 +30,12 @@ export default function BrokenPage() {
         }
       />
       <Panel>
-        <DataTable table={BROKEN_RECORDS} />
+        <DataTable
+          columns={COLUMNS}
+          rows={broken}
+          rowKey={(row) => `${row.asset}-${row.reportedDate}`}
+          emptyMessage="No broken or damaged assets reported."
+        />
       </Panel>
     </>
   );

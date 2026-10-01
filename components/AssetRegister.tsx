@@ -5,9 +5,11 @@ import { useState } from "react";
 import { Badge } from "@/components/Badge";
 import type { Asset } from "@/lib/types";
 
-const CATEGORY_OPTIONS = ["All Categories", "Desktop", "Laptop", "Printer", "Monitor"];
+const ALL = "All";
 
-const STATUS_OPTIONS = ["All Status", "Active", "Assigned", "Maintenance", "Broken"];
+function unique(values: string[]) {
+  return [...new Set(values)].sort();
+}
 
 function searchableText(asset: Asset) {
   return [
@@ -31,17 +33,22 @@ export function AssetRegister({
   initialQuery: string;
 }) {
   const [query, setQuery] = useState(initialQuery);
-  const [category, setCategory] = useState(CATEGORY_OPTIONS[0]);
-  const [status, setStatus] = useState(STATUS_OPTIONS[0]);
+  const [category, setCategory] = useState(ALL);
+  const [status, setStatus] = useState(ALL);
   const [message, setMessage] = useState("");
+
+  const categories = unique(assets.map((asset) => asset.category));
+  const statuses = unique(assets.map((asset) => asset.status));
 
   const needle = query.trim().toLowerCase();
   const visible = assets.filter((asset) => {
     const matchesQuery = needle === "" || searchableText(asset).includes(needle);
-    const matchesCategory = category === CATEGORY_OPTIONS[0] || asset.category === category;
-    const matchesStatus = status === STATUS_OPTIONS[0] || asset.status === status;
+    const matchesCategory = category === ALL || asset.category === category;
+    const matchesStatus = status === ALL || asset.status === status;
     return matchesQuery && matchesCategory && matchesStatus;
   });
+
+  const hasAssets = assets.length > 0;
 
   return (
     <>
@@ -58,8 +65,11 @@ export function AssetRegister({
           onChange={(event) => setCategory(event.target.value)}
           aria-label="Filter by category"
         >
-          {CATEGORY_OPTIONS.map((option) => (
-            <option key={option}>{option}</option>
+          <option value={ALL}>All Categories</option>
+          {categories.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
           ))}
         </select>
         <select
@@ -67,14 +77,17 @@ export function AssetRegister({
           onChange={(event) => setStatus(event.target.value)}
           aria-label="Filter by status"
         >
-          {STATUS_OPTIONS.map((option) => (
-            <option key={option}>{option}</option>
+          <option value={ALL}>All Status</option>
+          {statuses.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
           ))}
         </select>
         <button
           className="btn btn-light"
           type="button"
-          onClick={() => setMessage("Demo UI: register would be exported as an Excel file.")}
+          onClick={() => setMessage("Export is not available until a data source is connected.")}
         >
           Export Excel
         </button>
@@ -83,8 +96,8 @@ export function AssetRegister({
           type="button"
           onClick={() => {
             setQuery("");
-            setCategory(CATEGORY_OPTIONS[0]);
-            setStatus(STATUS_OPTIONS[0]);
+            setCategory(ALL);
+            setStatus(ALL);
             setMessage("");
           }}
         >
@@ -97,33 +110,35 @@ export function AssetRegister({
         </p>
       ) : null}
       <div className="panel">
-        <div className="tablewrap">
-          <table>
-            <thead>
-              <tr>
-                {[
-                  "Asset Code",
-                  "Category",
-                  "Brand / Model",
-                  "Serial Number",
-                  "Location",
-                  "Department",
-                  "Status",
-                  "Action",
-                ].map((column) => (
-                  <th key={column} scope="col">
-                    {column}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {visible.length === 0 ? (
+        {visible.length === 0 ? (
+          <p className="empty">
+            {hasAssets
+              ? "No assets match your search."
+              : "No assets registered yet. Add your first asset to get started."}
+          </p>
+        ) : (
+          <div className="tablewrap">
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan={8}>No assets match your search.</td>
+                  {[
+                    "Asset Code",
+                    "Category",
+                    "Brand / Model",
+                    "Serial Number",
+                    "Location",
+                    "Department",
+                    "Status",
+                    "Action",
+                  ].map((column) => (
+                    <th key={column} scope="col">
+                      {column}
+                    </th>
+                  ))}
                 </tr>
-              ) : (
-                visible.map((asset) => (
+              </thead>
+              <tbody>
+                {visible.map((asset) => (
                   <tr key={asset.code}>
                     <td>{asset.code}</td>
                     <td>{asset.category}</td>
@@ -132,7 +147,7 @@ export function AssetRegister({
                     <td>{asset.location}</td>
                     <td>{asset.department}</td>
                     <td>
-                      <Badge tone={asset.tone}>{asset.status}</Badge>
+                      <Badge status={asset.status} />
                     </td>
                     <td>
                       <button className="btn btn-light" type="button">
@@ -140,11 +155,11 @@ export function AssetRegister({
                       </button>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </>
   );

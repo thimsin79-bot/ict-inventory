@@ -4,31 +4,40 @@ import { useState } from "react";
 
 import { Field } from "@/components/Field";
 
-const SAMPLE_CODE = "ICT-00001";
+const NOT_AVAILABLE =
+  "Codes are not available until a data source is connected.";
 
-export function BarcodeTool() {
-  const [code, setCode] = useState(SAMPLE_CODE);
-  const [generated, setGenerated] = useState(SAMPLE_CODE);
-  const [printed, setPrinted] = useState(false);
+export function BarcodeTool({ defaultCode }: { defaultCode: string }) {
+  const [code, setCode] = useState(defaultCode);
+  const [generated, setGenerated] = useState(defaultCode);
+  const [message, setMessage] = useState("");
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const trimmed = code.trim();
+
+    if (trimmed === "") {
+      setGenerated("");
+      setMessage("Enter an asset code to generate a label.");
+      return;
+    }
+
+    setGenerated(trimmed);
+    setMessage(NOT_AVAILABLE);
+  }
 
   return (
     <>
       <section className="panel">
         <h3>Generate Asset Label</h3>
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            setGenerated(code.trim() || SAMPLE_CODE);
-            setPrinted(false);
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <Field label="Asset Code" htmlFor="barcode-code">
             <input
               id="barcode-code"
               name="assetCode"
               value={code}
               onChange={(event) => setCode(event.target.value)}
-              placeholder={SAMPLE_CODE}
+              placeholder="e.g. ICT-00001"
             />
           </Field>
           <div className="spacer" />
@@ -41,20 +50,21 @@ export function BarcodeTool() {
         <div className="glyph" aria-hidden="true">
           ▦
         </div>
-        <h3>{generated}</h3>
+        <h3>{generated || "No code"}</h3>
         <p>QR Code Preview</p>
-        <button className="btn btn-light" type="button" onClick={() => setPrinted(true)}>
+        <button
+          className="btn btn-light"
+          type="button"
+          onClick={() => setMessage("Printing is not available until a data source is connected.")}
+        >
           Print Label
         </button>
-        {printed ? (
-          <>
-            <div className="spacer" />
-            <p className="notice" role="status">
-              Demo UI: label sent to print queue.
-            </p>
-          </>
-        ) : null}
       </section>
+      {message ? (
+        <p className="notice" role="status">
+          {message}
+        </p>
+      ) : null}
     </>
   );
 }

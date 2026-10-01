@@ -1,12 +1,25 @@
 import { KpiGrid } from "@/components/KpiGrid";
 import { PageHeader } from "@/components/PageHeader";
-import { EQUIPMENT_STATS } from "@/lib/data";
+import { CATEGORY_ICONS } from "@/lib/navigation";
+import { getCategoryBreakdown } from "@/lib/store";
 
-export default function EquipmentPage() {
+export default async function EquipmentPage() {
+  const categories = await getCategoryBreakdown();
+
   return (
     <>
       <PageHeader title="Equipment" subtitle="ICT equipment categories" />
-      <KpiGrid stats={EQUIPMENT_STATS} />
+      {categories.length === 0 ? (
+        <p className="empty">No equipment registered yet.</p>
+      ) : (
+        <KpiGrid
+          stats={categories.map((category) => ({
+            label: category.label,
+            value: String(category.value),
+            icon: CATEGORY_ICONS[category.label],
+          }))}
+        />
+      )}
     </>
   );
 }
