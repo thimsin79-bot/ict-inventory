@@ -1,11 +1,16 @@
 # ICT Inventory Management
 
-A front-end web application for managing ICT (Information and Communications Technology) asset inventory. It is a single-page interface built with HTML, CSS, and vanilla JavaScript — no external dependencies or build tools required.
+A web application for managing ICT (Information and Communications Technology) asset
+inventory. Built with **Next.js 16** (App Router), **React 19** and **TypeScript**.
+
+> Converted from the original single-file static app. `index.html` at the repo root is the
+> legacy standalone version, kept only for reference — the live application is the
+> Next.js app described below.
 
 ## Features
 
 - **Dashboard** — overview of total assets, active/broken/maintenance counts, total value, assets by category and location, and recent activity
-- **Assets** — searchable register of all ICT assets (code, category, brand/model, serial number, location, department, status)
+- **Assets** — searchable, filterable register of all ICT assets (code, category, brand/model, serial number, location, department, status)
 - **Add Asset** — form for registering new assets
 - **Equipment** — summary counts by equipment category
 - **Assignments** — track assets assigned to staff and departments
@@ -21,47 +26,87 @@ A front-end web application for managing ICT (Information and Communications Tec
 - **Users & Roles** — system user management
 - **Settings** — organization, asset code prefix, currency, and date format configuration
 
-## Getting Started
+## Getting started
 
-1. Open `index.html` in any modern web browser.
-2. Alternatively, serve the folder locally and open it in the browser.
+```bash
+npm install     # install dependencies
+npm run dev     # start the dev server on http://localhost:3000
+npm run build   # production build
+npm start       # serve the production build
+npm run lint    # eslint
+npm run typecheck   # tsc --noEmit
+```
 
-No server, database, or installation is required. Data shown is sample/static mock data for a demonstration UI.
+## Routes
 
-## Project Structure
+Each sidebar section is a real URL (not in-page state switching), so the browser
+back/forward buttons and deep links work.
+
+| Route | Page | Route | Page |
+| --- | --- | --- | --- |
+| `/` | redirects to `/dashboard` | `/barcode` | Barcode / QR |
+| `/dashboard` | Dashboard | `/locations` | Locations |
+| `/assets` | All Assets | `/departments` | Departments |
+| `/assets/new` | Add Asset | `/suppliers` | Suppliers |
+| `/equipment` | Equipment | `/purchases` | Purchasing |
+| `/assignments` | Assignments | `/history` | Historical Inventory |
+| `/transfers` | Transfers | `/reports` | Reports & Analytics |
+| `/maintenance` | Maintenance | `/users` | Users & Roles |
+| `/broken` | Broken / Damaged | `/settings` | Settings |
+| `/audit` | Asset Audit | | |
+
+## Project structure
 
 ```
 D:\ICT INVENTORY\
-├── index.html           # Complete application (HTML, CSS, JS)
-├── .gitignore
-└── README.md
+├── app\
+│   ├── layout.tsx              # Root layout: <html>, metadata, global CSS
+│   ├── globals.css             # All styling (carried over from the original <style>)
+│   ├── page.tsx                # Redirects / -> /dashboard
+│   └── (app)\                  # Route group: shared app shell
+│       ├── layout.tsx          # Sidebar + topbar + <main>
+│       └── <page>\page.tsx     # One folder per route
+├── components\                 # React components (UI + client-side interactivity)
+├── lib\
+│   ├── types.ts                # Shared TypeScript types
+│   └── data.ts                 # All mock/sample data + nav definition
+├── index.html                  # Legacy standalone version (reference only)
+├── next.config.ts
+├── tsconfig.json
+└── eslint.config.mjs
 ```
 
-## Navigating the UI
+## Notes on the conversion
 
-- Use the sidebar to switch between pages.
-- The global search bar (top bar) filters assets — press Enter to jump to the All Assets page with the search applied.
-- The Asset search on the All Assets page filters rows live as you type.
+- **Data** lives in `lib/data.ts` as typed constants, so it can be swapped for a real
+  database or API later without touching the UI components.
+- **Search**: the top bar is a plain `GET` form to `/assets?q=…`, so it works without
+  JavaScript. The All Assets page reads `q` from the URL server-side and filters live.
+- **Client components** are only used where interactivity is needed: the sidebar (active
+  link highlighting), the asset register (live filtering), the add-asset form, settings,
+  the barcode tool, and the reports grid. Every other page is a static server component
+  and is prerendered at build time.
+- **Styling** is the original CSS, unchanged apart from: `.nav button` → `.nav a`
+  (links instead of buttons), an always-on `.tablewrap` overflow, a `.notice` style for
+  inline status messages, `.kpis` bottom margin, a skip link, and `:focus-visible` rings.
+- **Demo placeholders** (Save Asset, Export Excel, Generate Code, Save Settings, report
+  generation, print label) show an inline status message instead of `alert()`. No data is
+  persisted — everything is static mock data.
+- Styling is plain CSS with a small custom design system. No Tailwind, no UI library.
 
-## Demo Notes
+## Deployment & Git workflow
 
-- Buttons such as **Save Asset**, **Generate Code**, and **Save Settings** show `alert()` placeholders as this is a demonstration interface.
-- Sample data (583 assets across 2018 and earlier categories) is illustrative only.
-
-## Deployment & Git Workflow (set up 1 Oct 2026)
-
-This project is already connected to **GitHub** and **Vercel** with **automatic deploys on every push to `main`**. You do not need to redeploy manually — just edit, commit, and push.
+This project is connected to **GitHub** and **Vercel** with **automatic deploys on every
+push to `main`**.
 
 ### Where it lives
 
 - **GitHub repo:** `thimsin79-bot/ict-inventory` → https://github.com/thimsin79-bot/ict-inventory
 - **Live site (Vercel):** https://ict-inventory-iota.vercel.app
 - **Vercel project:** `ict-inventory` (team: `thimsin`, account: `thimsin79-8849`)
-- **Production branch:** `main` — pushes to it auto-build and go live.
+- **Production branch:** `main` — pushes auto-build and go live.
 
 ### How to publish a change
-
-From the `D:\ICT INVENTORY` folder:
 
 ```
 git add -A
@@ -69,21 +114,9 @@ git commit -m "describe your change"
 git push origin main
 ```
 
-The Vercel Git integration picks up the new commit and redeploys automatically (takes a few seconds). Verify it by reloading the live URL.
+Vercel detects the Next.js framework, runs `npm run build`, and serves the output. There
+is no longer a `index.html` entry-point requirement — the root URL `/` is handled by
+`app/page.tsx`, which redirects to `/dashboard`.
 
-### The 404 fix that was made today
-
-The site initially returned **404** because the page was named `ICT_Inventory.html`. Vercel only serves a file at the root URL (`/`) if it is named `index.html`. Fix: the file was renamed to `index.html` (README references updated to match). **If you ever add a new page, remember to keep the entry-point file named `index.html`.**
-
-### Local ↔ live
-
-- Run locally by just opening `index.html` in a browser (no build step, no dependencies).
-- To deploy a one-off preview without touching Git: `vercel --token <your-token>` from this folder.
-
-### Tooling notes (learned today)
-
-- Auth for `gh` and `vercel` is done via personal access tokens passed with `--token` / `gh auth setup-git` (no interactive browser login was available on this machine).
-- Pushing tokens through a PowerShell pipe into `gh` can mangle them; writing the token to a temp file and using `cmd /c "... < file"` reliably authenticated.
-- Commits may warn `LF will be replaced by CRLF` on Windows — this is normal and harmless.
-
-> **Security:** the GitHub and Vercel tokens used for this setup were shared in chat. Consider rotating them and storing replacements securely (e.g., environment variables) rather than in files.
+> **Note:** Vercel's build needs Node 20+ (this project was developed on Node 24).
+> Vercel provides this by default.

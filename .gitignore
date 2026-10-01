@@ -5,6 +5,12 @@
 node_modules/
 npm-debug.log*
 
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
 # OS
 .DS_Store
 Thumbs.db
@@ -12,4 +18,3 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
-.vercel
