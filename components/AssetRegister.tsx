@@ -15,7 +15,8 @@ function searchableText(asset: Asset) {
   return [
     asset.code,
     asset.category,
-    asset.brandModel,
+    asset.brand,
+    asset.model,
     asset.serial,
     asset.location,
     asset.department,
@@ -134,15 +135,16 @@ export function AssetRegister({
                     <th key={column} scope="col">
                       {column}
                     </th>
-                  ))}
-                </tr>
+                  ))}                </tr>
               </thead>
               <tbody>
                 {visible.map((asset) => (
                   <tr key={asset.code}>
                     <td>{asset.code}</td>
                     <td>{asset.category}</td>
-                    <td>{asset.brandModel}</td>
+                    <td>
+                      {asset.brand} {asset.model}
+                    </td>
                     <td>{asset.serial}</td>
                     <td>{asset.location}</td>
                     <td>{asset.department}</td>

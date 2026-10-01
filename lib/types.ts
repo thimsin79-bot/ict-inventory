@@ -26,13 +26,20 @@ export interface NavSection {
 export interface Asset {
   code: string;
   category: string;
-  brandModel: string;
+  brand: string;
+  model: string;
   serial: string;
   location: string;
   department: string;
   status: AssetStatus;
-  purchasePrice: number;
-  purchaseDate: string;
+  purchasePrice?: number;
+  purchaseDate?: string;
+}
+
+export interface AssetFormOptions {
+  categories: string[];
+  locations: string[];
+  departments: string[];
 }
 
 export interface AssetSummary {

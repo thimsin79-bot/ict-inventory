@@ -3,16 +3,37 @@
 import { useState } from "react";
 
 import { Field } from "@/components/Field";
-import {
-  AVAILABILITY_OPTIONS,
-  CATEGORY_OPTIONS,
-  CONDITION_OPTIONS,
-  DEPARTMENT_OPTIONS,
-  LOCATION_OPTIONS,
-  SUPPLIER_OPTIONS,
-} from "@/lib/navigation";
+import { AVAILABILITY_OPTIONS, CONDITION_OPTIONS, SUPPLIER_OPTIONS } from "@/lib/navigation";
+import type { AssetFormOptions } from "@/lib/types";
 
-export function AddAssetForm({ assetCode }: { assetCode: string }) {
+function Options({
+  values,
+  emptyLabel,
+}: {
+  values: string[];
+  emptyLabel: string;
+}) {
+  if (values.length === 0) {
+    return <option value="">{emptyLabel}</option>;
+  }
+
+  return (
+    <>
+      <option value="">Select…</option>
+      {values.map((option) => (
+        <option key={option}>{option}</option>
+      ))}
+    </>
+  );
+}
+
+export function AddAssetForm({
+  assetCode,
+  options,
+}: {
+  assetCode: string;
+  options: AssetFormOptions;
+}) {
   const [message, setMessage] = useState("");
 
   return (
@@ -27,10 +48,8 @@ export function AddAssetForm({ assetCode }: { assetCode: string }) {
         <input id="asset-code" name="assetCode" defaultValue={assetCode} />
       </Field>
       <Field label="Category" htmlFor="category">
-        <select id="category" name="category" defaultValue={CATEGORY_OPTIONS[0]}>
-          {CATEGORY_OPTIONS.map((option) => (
-            <option key={option}>{option}</option>
-          ))}
+        <select id="category" name="category" defaultValue="">
+          <Options values={options.categories} emptyLabel="No categories available" />
         </select>
       </Field>
       <Field label="Brand" htmlFor="brand">
@@ -56,26 +75,17 @@ export function AddAssetForm({ assetCode }: { assetCode: string }) {
       </Field>
       <Field label="Supplier" htmlFor="supplier">
         <select id="supplier" name="supplier" defaultValue="">
-          <option value="">No suppliers available</option>
-          {SUPPLIER_OPTIONS.map((option) => (
-            <option key={option}>{option}</option>
-          ))}
+          <Options values={SUPPLIER_OPTIONS} emptyLabel="No suppliers available" />
         </select>
       </Field>
       <Field label="Location" htmlFor="location">
         <select id="location" name="location" defaultValue="">
-          <option value="">No locations available</option>
-          {LOCATION_OPTIONS.map((option) => (
-            <option key={option}>{option}</option>
-          ))}
+          <Options values={options.locations} emptyLabel="No locations available" />
         </select>
       </Field>
       <Field label="Department" htmlFor="department">
         <select id="department" name="department" defaultValue="">
-          <option value="">No departments available</option>
-          {DEPARTMENT_OPTIONS.map((option) => (
-            <option key={option}>{option}</option>
-          ))}
+          <Options values={options.departments} emptyLabel="No departments available" />
         </select>
       </Field>
       <Field label="Status" htmlFor="status">

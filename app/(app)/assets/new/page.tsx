@@ -3,10 +3,13 @@ import Link from "next/link";
 import { AddAssetForm } from "@/components/AddAssetForm";
 import { PageHeader } from "@/components/PageHeader";
 import { Panel } from "@/components/Panel";
-import { getNextAssetCode } from "@/lib/store";
+import { getAssetFormOptions, getNextAssetCode } from "@/lib/store";
 
 export default async function AddAssetPage() {
-  const assetCode = await getNextAssetCode();
+  const [assetCode, options] = await Promise.all([
+    getNextAssetCode(),
+    getAssetFormOptions(),
+  ]);
 
   return (
     <>
@@ -20,7 +23,7 @@ export default async function AddAssetPage() {
         }
       />
       <Panel>
-        <AddAssetForm assetCode={assetCode} />
+        <AddAssetForm assetCode={assetCode} options={options} />
       </Panel>
     </>
   );

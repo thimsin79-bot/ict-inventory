@@ -3,7 +3,8 @@
 A web application for managing ICT (Information and Communications Technology) asset
 inventory. Built with **Next.js 16** (App Router), **React 19** and **TypeScript**.
 
-> ⚠️ **No data source is connected — every page is empty by design.** See [Data](#data).
+> ⚠️ **Nothing can be saved.** A handful of sample assets are seeded so the UI is
+> reviewable, but there is no database behind the forms. See [Data](#data).
 
 > Converted from the original single-file static app. `index.html` at the repo root is the
 > legacy standalone version, kept only for reference — the live application is the
@@ -86,23 +87,40 @@ D:\ICT INVENTORY\
 
 ## Data
 
-**This app has no data source connected. Every page is intentionally empty.**
+**There is no database. The app is a read-only UI scaffold over a tiny seed dataset.**
 
-There is no hardcoded mock data anywhere in the source. All data access goes through the
-async functions in `lib/store/`, which currently return empty results:
+Data access goes through async functions in `lib/store/`. Five sample assets are seeded in
+`lib/store/assets.ts` (`SEED_ASSETS`) so the dashboard, register, search and filters can be
+reviewed; every other store function currently returns an empty result.
 
 | Module | Functions |
 | --- | --- |
-| `lib/store/assets.ts` | `listAssets`, `getAssetSummary`, `getCategoryBreakdown`, `getLocationBreakdown`, `getNextAssetCode` |
+| `lib/store/assets.ts` | `listAssets`, `getAssetSummary`, `getAssetFormOptions`, `getCategoryBreakdown`, `getLocationBreakdown`, `getNextAssetCode` |
 | `lib/store/operations.ts` | `listRecentActivity`, `listAssignments`, `listTransfers`, `listMaintenance`, `getMaintenanceSummary`, `listBroken`, `getAuditSummary` |
 | `lib/store/reference.ts` | `listLocations`, `listDepartments`, `listSuppliers`, `listPurchases`, `listHistory`, `listUsers`, `listReports` |
+
+**Everything on screen is derived, not hardcoded.** Dashboard counters, the category and
+location breakdowns, the audit totals, the next asset code, and the Add Asset form's
+category/location/department dropdowns are all computed from `listAssets()`. Add a record
+to `SEED_ASSETS` and every number on the dashboard updates on its own.
 
 **Consequences of having no storage:**
 
 - Nothing can be saved. The Add Asset and Settings forms show a notice and discard input
   on submit. There is no database, file, or API behind them.
-- Every list page renders an empty state, and the dashboard counters all read `0`.
-- This is a UI scaffold, not a working inventory system.
+- Pages with no seed data (Assignments, Transfers, Maintenance, Locations, Suppliers,
+  Purchasing, History, Reports) render an empty state.
+- The 5 seeded assets have **no `purchasePrice` or `purchaseDate`** — those fields are
+  optional and render as `—`, so **TOTAL VALUE shows `$0`**. `totalValue` sums only
+  records that actually have a price.
+- `Locations` and `Departments` are empty even though the seeded assets reference
+  "Main Office", "Computer Lab" etc. Those reference tables were not part of the seed set.
+
+### Known data-quality issue in the seed set
+
+`ICT-00004` has `location: "Finance"` and `department: "Finance"` — the same value in
+both columns, and "Finance" is a department name being used as a location. It was left
+as-is rather than guessed at; give it a real location when the reference tables exist.
 
 ### Connecting a real data source
 
@@ -125,14 +143,16 @@ correctly: pages stay statically prerendered until a query needs request-time da
 
 ## Notes on the conversion
 
-- **No hardcoded data.** Sample records were removed entirely. Dashboard counters, category
-  and location breakdowns, and audit totals are all *computed* from `listAssets()` rather
-  than hardcoded, so they become real automatically once data is connected.
+- **No hardcoded data in the UI.** Sample records live only in `lib/store/`. Dashboard
+  counters, category and location breakdowns, audit totals, the next asset code, and the
+  Add Asset dropdowns are all *computed* from `listAssets()` rather than hardcoded.
 - **Data lives in `lib/store/`**, not in components, so a real database or API can be
   dropped in without touching the UI.
 - **Search**: the top bar is a plain `GET` form to `/assets?q=…`, so it works without
   JavaScript. The All Assets page reads `q` from the URL server-side and filters live.
-  Category and status filter options are derived from the records that exist, not hardcoded.
+  Search is case-insensitive but **stored serials keep their original case**, since they
+  are case-sensitive identifiers. Category and status filter options are derived from the
+  records that exist, not hardcoded.
 - **Client components** are only used where interactivity is needed: the sidebar (active
   link highlighting), the asset register (live filtering), the add-asset form, settings,
   the barcode tool, and the reports grid. Every other page is a server component.

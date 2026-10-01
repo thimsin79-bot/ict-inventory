@@ -51,15 +51,6 @@ export const CURRENT_USER = {
   initials: "IA",
 };
 
-export const CATEGORY_OPTIONS = [
-  "Desktop",
-  "Laptop",
-  "Monitor",
-  "Printer",
-  "Projector",
-  "Network Equipment",
-];
-
 export const CATEGORY_ICONS: Record<string, string> = {
   Desktop: "🖥️",
   Laptop: "💻",
@@ -75,10 +66,6 @@ export const AVAILABILITY_OPTIONS: Availability[] = ["Available", "Assigned", "S
 export const CONDITION_OPTIONS: AssetCondition[] = ["Good", "Fair", "Poor"];
 
 export const SUPPLIER_OPTIONS: string[] = [];
-
-export const LOCATION_OPTIONS: string[] = [];
-
-export const DEPARTMENT_OPTIONS: string[] = [];
 
 export const CURRENCY_OPTIONS = ["USD", "KHR"];
 
