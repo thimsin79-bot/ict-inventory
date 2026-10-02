@@ -1,0 +1,63 @@
+﻿
+> ict-inventory@1.0.0 build
+> next build
+
+▲ Next.js 16.3.8 (Turbopack)
+- Environments: .env
+✓ Running next.config.ts took 120ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.1s
+  Running TypeScript ...
+  Finished TypeScript in 6.0s ...
+  Collecting page data using 3 workers ...
+[realtime] using local backend
+[realtime] using local backend
+[realtime] using local backend
+  Generating static pages using 3 workers (0/25) ...
+  Generating static pages using 3 workers (6/25) 
+  Generating static pages using 3 workers (12/25) 
+  Generating static pages using 3 workers (18/25) 
+✓ Generating static pages using 3 workers (25/25) in 1125ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/assets/export
+├ ƒ /api/events
+├ ƒ /api/qr
+├ ƒ /api/reports/[slug]
+├ ƒ /assets
+├ ƒ /assets/[id]
+├ ƒ /assets/[id]/edit
+├ ƒ /assets/new
+├ ƒ /assignments
+├ ƒ /audit
+├ ƒ /barcode
+├ ƒ /broken
+├ ƒ /dashboard
+├ ƒ /departments
+├ ƒ /departments/[id]/edit
+├ ƒ /equipment
+├ ƒ /forbidden
+├ ƒ /history
+├ ƒ /locations
+├ ƒ /locations/[id]/edit
+├ ƒ /login
+├ ƒ /maintenance
+├ ƒ /purchases
+├ ƒ /purchases/[id]
+├ ƒ /reports
+├ ƒ /reports/[slug]
+├ ƒ /settings
+├ ƒ /suppliers
+├ ƒ /suppliers/[id]/edit
+├ ƒ /transfers
+├ ƒ /users
+└ ƒ /users/[id]/edit
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
