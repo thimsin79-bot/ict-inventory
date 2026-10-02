@@ -283,9 +283,19 @@ export function AssetRegister({
                         View
                       </Link>
                       {canEdit ? (
-                        <Link className="btn btn-light" href={`/assets/${asset.id}/edit`}>
-                          Edit
-                        </Link>
+                        <>
+                          <Link className="btn btn-light" href={`/assets/${asset.id}/edit`}>
+                            Edit
+                          </Link>
+                          <form action={`/assets/${asset.id}/delete`} method="post" className="inline">
+                            <input type="hidden" name="id" value={asset.id} />
+                            <button type="submit" className="btn btn-danger" onClick={(e) => {
+                              if (!confirm('Delete this asset?')) e.preventDefault();
+                            }}>
+                              Delete
+                            </button>
+                          </form>
+                        </>
                       ) : null}
                     </td>
                   </tr>
