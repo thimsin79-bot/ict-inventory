@@ -3,10 +3,12 @@ import Link from "next/link";
 import { BarList } from "@/components/BarList";
 import { DataTable } from "@/components/DataTable";
 import type { Column } from "@/components/DataTable";
+import { LiveRefresh } from "@/components/LiveRefresh";
 import { PageHeader } from "@/components/PageHeader";
 import { Panel } from "@/components/Panel";
 import { StatCard } from "@/components/StatCard";
-import { formatCurrency, formatPercent } from "@/lib/format";
+import { formatPercent } from "@/lib/format";
+import { money } from "@/lib/format-server";
 import {
   getAssetSummary,
   getCategoryBreakdown,
@@ -34,9 +36,13 @@ export default async function DashboardPage() {
   ]);
 
   const activeTotal = summary.active + summary.assigned;
+  const totalValue = await money(summary.totalValue);
 
   return (
     <>
+      <LiveRefresh
+        topics={["assets", "assignments", "transfers", "maintenance", "broken", "audit"]}
+      />
       <PageHeader
         title="ICT Inventory Dashboard"
         subtitle="Overview of ICT assets and inventory activities"
@@ -71,7 +77,7 @@ export default async function DashboardPage() {
         />
         <StatCard
           label="TOTAL VALUE"
-          value={formatCurrency(summary.totalValue)}
+          value={totalValue}
           foot="Asset purchase value"
         />
       </div>

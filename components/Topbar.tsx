@@ -1,6 +1,14 @@
-import { CURRENT_USER } from "@/lib/navigation";
+import { logoutAction } from "@/lib/auth/actions";
 
-export function Topbar() {
+export function Topbar({
+  name,
+  role,
+  initials,
+}: {
+  name: string;
+  role: string;
+  initials: string;
+}) {
   return (
     <header className="topbar">
       <form className="search" role="search" action="/assets" method="get">
@@ -14,13 +22,18 @@ export function Topbar() {
       </form>
       <div className="user">
         <div>
-          <b>{CURRENT_USER.name}</b>
+          <b>{name}</b>
           <br />
-          <small>{CURRENT_USER.role}</small>
+          <small>{role}</small>
         </div>
         <div className="avatar" aria-hidden="true">
-          {CURRENT_USER.initials}
+          {initials}
         </div>
+        <form action={logoutAction}>
+          <button className="btn btn-ghost" type="submit">
+            Sign out
+          </button>
+        </form>
       </div>
     </header>
   );

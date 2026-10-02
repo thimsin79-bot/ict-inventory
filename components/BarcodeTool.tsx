@@ -4,12 +4,17 @@ import { useState } from "react";
 
 import { Field } from "@/components/Field";
 
-const NOT_AVAILABLE =
-  "Codes are not available until a data source is connected.";
-
-export function BarcodeTool({ defaultCode }: { defaultCode: string }) {
+export function BarcodeTool({
+  defaultCode,
+  codes,
+  organization,
+}: {
+  defaultCode: string;
+  codes: string[];
+  organization: string;
+}) {
   const [code, setCode] = useState(defaultCode);
-  const [generated, setGenerated] = useState(defaultCode);
+  const [generated, setGenerated] = useState(defaultCode.trim());
   const [message, setMessage] = useState("");
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -23,7 +28,7 @@ export function BarcodeTool({ defaultCode }: { defaultCode: string }) {
     }
 
     setGenerated(trimmed);
-    setMessage(NOT_AVAILABLE);
+    setMessage("");
   }
 
   return (
@@ -35,36 +40,54 @@ export function BarcodeTool({ defaultCode }: { defaultCode: string }) {
             <input
               id="barcode-code"
               name="assetCode"
+              list="asset-codes"
               value={code}
               onChange={(event) => setCode(event.target.value)}
               placeholder="e.g. ICT-00001"
             />
           </Field>
+          <datalist id="asset-codes">
+            {codes.map((item) => (
+              <option key={item} value={item} />
+            ))}
+          </datalist>
           <div className="spacer" />
           <button className="btn btn-primary" type="submit">
             Generate Code
           </button>
         </form>
+        {message ? (
+          <p className="notice" role="status">
+            {message}
+          </p>
+        ) : null}
       </section>
+
       <section className="panel qr-preview">
-        <div className="glyph" aria-hidden="true">
-          ▦
-        </div>
-        <h3>{generated || "No code"}</h3>
-        <p>QR Code Preview</p>
-        <button
-          className="btn btn-light"
-          type="button"
-          onClick={() => setMessage("Printing is not available until a data source is connected.")}
-        >
-          Print Label
-        </button>
+        {generated ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element -- QR is served by our own API route */}
+            <img
+              className="qr-image"
+              src={`/api/qr?code=${encodeURIComponent(generated)}&size=220`}
+              alt={`QR code for ${generated}`}
+              width={220}
+              height={220}
+            />
+            <h3 className="mono">{generated}</h3>
+            <p>{organization}</p>
+            <button
+              className="btn btn-light"
+              type="button"
+              onClick={() => window.print()}
+            >
+              Print Label
+            </button>
+          </>
+        ) : (
+          <p className="empty">Enter an asset code to preview its label.</p>
+        )}
       </section>
-      {message ? (
-        <p className="notice" role="status">
-          {message}
-        </p>
-      ) : null}
     </>
   );
 }
